@@ -1,4 +1,5 @@
-import { Movie } from '@/components/movieCard';
+import { Movie } from "@/app/types/movieType";
+
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
 
@@ -11,6 +12,8 @@ const API_OPTIONS = {
     Authorization: `Bearer ${API_KEY}`
   }
 };
+
+
 
 export const getMovies = async (query = ''): Promise<Movie[]> => {
   const endpoint = query
@@ -31,3 +34,20 @@ export const getMovies = async (query = ''): Promise<Movie[]> => {
 
   return data.results || [];
 };
+
+
+export const updateSearchCount = async (query: string, movie: Movie) => {
+  try {
+    await fetch('/api/trending', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query, movie }),
+    });
+  } catch (error) {
+    console.error('Error in search trending', error)
+  }
+};
+
+
