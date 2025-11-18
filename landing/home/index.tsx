@@ -1,19 +1,19 @@
-'use client'
+'use client';
+import { Movie, TrendingItem } from '@/app/types/movieType';
 import Header from '@/components/header';
-import MovieCard, { Movie } from '@/components/movieCard';
+import MovieCard from '@/components/movieCard';
 import Search from '@/components/search';
 import Spinner from '@/components/spinner';
-import { getMovies } from '@/lib/api';
+import { getMovies, updateSearchCount } from '@/lib/api';
 import { useEffect, useState } from 'react';
 
-
-export function IndexHome () {
-  
+export function IndexHome() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [movieList, setMovieList] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [trendingMovies, setTrendingMovies] = useState<TrendingItem[]>([]);
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -36,10 +36,12 @@ export function IndexHome () {
 
       setMovieList(movies);
 
+      if (query && movies.length > 0) {
+        await updateSearchCount(query, movies[0]);
+      }
+
       if (query && movies.length === 0) {
-        setErrorMessage('Failed to fetch movies');
-        setMovieList([]);
-        return;
+        setErrorMessage('No movie found');
       }
     } catch (error) {
       console.error(`Error conecting, ${error}`);
@@ -48,6 +50,23 @@ export function IndexHome () {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const loadTrending = async () => {
+      try {
+        const res = await fetch('/api/trending');
+        // if (!res.ok) return;
+        const data = await res.json();
+
+        console.log('teste front api', data);
+        setTrendingMovies(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadTrending();
+  }, []);
 
   return (
     <main>
@@ -58,6 +77,24 @@ export function IndexHome () {
 
         <section className="all-movies">
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+
+          {trendingMovies.length > 0 && (
+            <section className="trending">
+              <h2>Trending Movies</h2>
+
+              <ul>
+                {trendingMovies.map((movie, index) => (
+                  <li key={movie.id}>
+                    <p>{index + 1}</p>
+                    <img src={movie.posterPath} alt={movie.searchTerm} />
+                    <p className="text-center text-xs mt-1 capitalize text-gray-200">
+                      {movie.searchTerm}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <h2 className="mt-[4px]">All Movies</h2>
 
