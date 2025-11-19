@@ -13,7 +13,7 @@ export const ScrollabList = ({children,className=''} : ScrollableListProps) => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
-  const onMouseDown = () => {
+  const onMouseDown = (e: MouseEvent<HTMLUListElement>) => {
     if (!slider.current) return;
     setIsDown(true);
     setStartX(e.pageX - slider.current.offsetLeft);
