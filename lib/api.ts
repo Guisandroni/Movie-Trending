@@ -15,10 +15,10 @@ const API_OPTIONS = {
 
 
 
-export const getMovies = async (query = ''): Promise<Movie[]> => {
+export const getMovies = async (query = '', page = 1): Promise<{ movies: Movie[]; totalPages: number }> => {
   const endpoint = query
-    ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
-    : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+    ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&page=${page}`
+    : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&page=${page}`;
 
   const response = await fetch(endpoint, API_OPTIONS);
 
@@ -28,11 +28,10 @@ export const getMovies = async (query = ''): Promise<Movie[]> => {
 
   const data = await response.json();
 
-  if (data.results && data.results.length === 0) {
-    return [];
-  }
-
-  return data.results || [];
+  return {
+    movies: data.results || [],
+    totalPages: data.total_pages || 1,
+  };
 };
 
 
@@ -65,4 +64,16 @@ export const getGlobalTrendingMovies = async (): Promise<Movie[]> => {
   
   return data.results || []
 
+}
+
+export const getMovieById = async (id: string): Promise<Movie> => {
+  const endpoint = `${API_BASE_URL}/movie/${id}?language=en-US`;
+
+  const response = await fetch(endpoint, API_OPTIONS);
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch movie details');
+  }
+
+  return await response.json();
 }

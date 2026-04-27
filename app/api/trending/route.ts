@@ -23,9 +23,6 @@ export async function GET() {
       .orderBy(desc(trendingMovies.count))
       .limit(5)
 
-    console.log('API GET');
-    console.log('Dados renderizando', trendingMovies);
-
     return NextResponse.json(data);
     
   } catch (error) {
